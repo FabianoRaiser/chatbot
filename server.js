@@ -48,6 +48,10 @@ function sendToChatbase(userMessage, botResponse, intentName, isHandled) {
         .catch((error) => console.error('Erro ao enviar resposta do bot:', error.message));
 }
 
+app.get('/', (req, res) => {
+    res.send('Olá, Inlog')
+})
+
 // Endpoint para receber mensagens do Google Chat
 app.post('/webhook', (req, res) => {
     const userMessage = req.body.message || "Mensagem vazia"; // Mensagem do usuário
