@@ -41,20 +41,22 @@ async function sendToChatbase(userMessage, botResponseText, userId = 'default-us
 
         // Envia a mensagem do usuário para o ChatBase
         console.log('Enviando mensagem do usuário para o ChatBase...');
-        const userResult = await axios.post('https://api.chatbase.com/message', userPayload, {
+        const userResult = await axios.post('https://chatbase.com/api/message', userPayload, {
             headers: {
                 'Content-Type': 'application/json',
-                'Accept': 'application/json'
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${CHATBASE_API_KEY}`
             }
         });
         console.log('Mensagem do usuário enviada ao ChatBase com sucesso:', userResult.status);
 
         // Envia a resposta do bot para o ChatBase
         console.log('Enviando resposta do bot para o ChatBase...');
-        const botResult = await axios.post('https://api.chatbase.com/message', botPayload, {
+        const botResult = await axios.post('https://chatbase.com/api/message', botPayload, {
             headers: {
                 'Content-Type': 'application/json',
-                'Accept': 'application/json'
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${CHATBASE_API_KEY}`
             }
         });
         console.log('Resposta do bot enviada ao ChatBase com sucesso:', botResult.status);
@@ -66,7 +68,33 @@ async function sendToChatbase(userMessage, botResponseText, userId = 'default-us
             console.error('Detalhes do erro:', error.response.data);
             console.error('Status do erro:', error.response.status);
         }
-        return false;
+        
+        // Tentar com endpoint alternativo se falhar
+        try {
+            console.log('Tentando endpoint alternativo do ChatBase...');
+            // Tentativa com endpoint alternativo
+            const altEndpoint = 'https://www.chatbase.co/api/v1/chat';
+            
+            const payload = {
+                chatbot_id: CHATBOT_ID,
+                message: userMessage,
+                user_id: userId
+            };
+            
+            const altResult = await axios.post(altEndpoint, payload, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${CHATBASE_API_KEY}`
+                }
+            });
+            
+            console.log('Mensagem enviada com sucesso ao endpoint alternativo:', altResult.status);
+            return true;
+        } catch (altError) {
+            console.error('Também falhou com endpoint alternativo:', altError.message);
+            return false;
+        }
     }
 }
 
