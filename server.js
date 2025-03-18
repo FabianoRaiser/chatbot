@@ -1,5 +1,5 @@
 const express = require('express');
-const axios = require('axios'); // Biblioteca para requisições HTTP
+const axios = require('axios');
 const app = express();
 
 // Configurações do Chatbase
@@ -10,71 +10,109 @@ const CHATBOT_ID = process.env.CHATBOT_ID; // Substitua pelo ID do seu Chatbot
 app.use(express.json());
 
 // Porta do servidor
-const PORT = 8080;
+const PORT = process.env.PORT || 8080;
 
 // Função para enviar dados para o Chatbase
-function sendToChatbase(userMessage, botResponse, intentName, isHandled) {
-    const userPayload = {
-        api_key: CHATBASE_API_KEY,
-        chatbot_id: CHATBOT_ID,
-        type: 'user',
-        platform: 'Dialogflow',
-        message: userMessage,
-        intent: intentName,
-        version: '1.0',
-        not_handled: !isHandled,
-        user_id: 'default-session'
-    };
+async function sendToChatbase(userMessage, botResponse, userId = 'default-user', intentName = 'default-intent') {
+    try {
+        // Mensagem do usuário
+        const userPayload = {
+            api_key: CHATBASE_API_KEY,
+            type: 'user',
+            platform: 'Dialogflow',  // Mantido como Dialogflow conforme código original
+            message: userMessage,
+            intent: intentName,
+            version: '1.0',
+            user_id: userId,
+            time_stamp: Date.now()
+        };
 
-    const botPayload = {
-        api_key: CHATBASE_API_KEY,
-        chatbot_id: CHATBOT_ID,
-        type: 'agent',
-        platform: 'Dialogflow',
-        message: botResponse,
-        intent: intentName,
-        version: '1.0',
-        not_handled: false,
-        user_id: 'default-session'
-    };
+        // Resposta do bot
+        const botPayload = {
+            api_key: CHATBASE_API_KEY,
+            type: 'agent',
+            platform: 'Dialogflow',  // Mantido como Dialogflow conforme código original
+            message: botResponse,
+            intent: intentName,
+            version: '1.0',
+            user_id: userId,
+            time_stamp: Date.now()
+        };
 
-    // Envia as mensagens para o Chatbase
-    axios.post('https://chatbase.com/api/message', userPayload, {
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
+        // Envia a mensagem do usuário para o ChatBase
+        console.log('Enviando mensagem do usuário para o ChatBase...');
+        const userResponse = await axios.post('https://api.chatbase.com/message', userPayload, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        });
+        console.log('Mensagem do usuário enviada ao ChatBase com sucesso:', userResponse.status);
+
+        // Envia a resposta do bot para o ChatBase
+        console.log('Enviando resposta do bot para o ChatBase...');
+        const botResponse = await axios.post('https://api.chatbase.com/message', botPayload, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        });
+        console.log('Resposta do bot enviada ao ChatBase com sucesso:', botResponse.status);
+
+        return true;
+    } catch (error) {
+        console.error('Erro ao enviar mensagens para o ChatBase:', error.message);
+        if (error.response) {
+            console.error('Detalhes do erro:', error.response.data);
+            console.error('Status do erro:', error.response.status);
         }
-    })
-        .then(() => console.log('Mensagem do usuário enviada ao Chatbase.'))
-        .catch((error) => console.error('Erro ao enviar mensagem do usuário:', error.message));
-
-    axios.post('https://chatbase.com/api/message', botPayload, {
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        }
-    })
-        .then(() => console.log('Resposta do bot enviada ao Chatbase.'))
-        .catch((error) => console.error('Erro ao enviar resposta do bot:', error.message));
+        return false;
+    }
 }
 
+// Rota de verificação de saúde
 app.get('/', (req, res) => {
-    res.send('Olá, Inlog')
-})
+    res.send('Serviço de integração Google Chat-ChatBase está funcionando');
+});
 
 // Endpoint para receber mensagens do Google Chat
-app.post('/webhook', (req, res) => {
-    const userMessage = req.body.message || "Mensagem vazia"; // Mensagem do usuário
-    const intentName = req.body.intent || "default-intent"; // Nome da intent
-    const botResponse = "Resposta automática do bot"; // Resposta do bot
-
-    console.log('Está sendo acessado o /webhook');
-
-    // Envia dados ao Chatbase
-    sendToChatbase(userMessage, botResponse, intentName, true);
-
-    // Retorna a resposta para o Google Chat
-    res.json({ text: botResponse });
+app.post('/webhook', async (req, res) => {
+    console.log('Webhook recebido:', JSON.stringify(req.body));
+    
+    try {
+        // Extrai os dados do evento do Google Chat
+        const event = req.body;
+        
+        // Verifica se é uma mensagem de texto
+        if (event.type === 'MESSAGE' && event.message && event.message.text) {
+            const userMessage = event.message.text;
+            const userId = event.user.name || event.user.displayName || 'anonymous';
+            const spaceId = event.space.name || 'default-space';
+            
+            console.log(`Mensagem recebida de ${userId}: ${userMessage}`);
+            
+            // Aqui você pode adicionar lógica para processar a mensagem
+            // ou chamar um serviço externo para obter uma resposta
+            
+            // Por enquanto, vamos usar uma resposta simples
+            const botResponse = `Recebi sua mensagem: "${userMessage}". Estou processando...`;
+            
+            // Envia os dados para o ChatBase
+            await sendToChatbase(userMessage, botResponse, userId);
+            
+            // Envia a resposta para o Google Chat
+            res.json({
+                text: botResponse
+            });
+        } else {
+            res.json({ text: "Desculpe, só posso processar mensagens de texto." });
+        }
+    } catch (error) {
+        console.error('Erro ao processar webhook:', error);
+        res.status(500).json({ 
+            text: "Ocorreu um erro ao processar sua mensagem." 
+        });
+    }
 });
 
 // Inicia o servidor
