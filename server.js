@@ -39,11 +39,21 @@ function sendToChatbase(userMessage, botResponse, intentName, isHandled) {
     };
 
     // Envia as mensagens para o Chatbase
-    axios.post('https://chatbase.com/api/message', userPayload)
+    axios.post('https://chatbase.com/api/message', userPayload, {
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
+    })
         .then(() => console.log('Mensagem do usuário enviada ao Chatbase.'))
         .catch((error) => console.error('Erro ao enviar mensagem do usuário:', error.message));
 
-    axios.post('https://chatbase.com/api/message', botPayload)
+    axios.post('https://chatbase.com/api/message', botPayload, {
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
+    })
         .then(() => console.log('Resposta do bot enviada ao Chatbase.'))
         .catch((error) => console.error('Erro ao enviar resposta do bot:', error.message));
 }
