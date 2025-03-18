@@ -13,13 +13,13 @@ app.use(express.json());
 const PORT = process.env.PORT || 8080;
 
 // Função para enviar dados para o Chatbase
-async function sendToChatbase(userMessage, botResponse, userId = 'default-user', intentName = 'default-intent') {
+async function sendToChatbase(userMessage, botResponseText, userId = 'default-user', intentName = 'default-intent') {
     try {
         // Mensagem do usuário
         const userPayload = {
             api_key: CHATBASE_API_KEY,
             type: 'user',
-            platform: 'Dialogflow',  // Mantido como Dialogflow conforme código original
+            platform: 'Dialogflow',
             message: userMessage,
             intent: intentName,
             version: '1.0',
@@ -31,8 +31,8 @@ async function sendToChatbase(userMessage, botResponse, userId = 'default-user',
         const botPayload = {
             api_key: CHATBASE_API_KEY,
             type: 'agent',
-            platform: 'Dialogflow',  // Mantido como Dialogflow conforme código original
-            message: botResponse,
+            platform: 'Dialogflow',
+            message: botResponseText,
             intent: intentName,
             version: '1.0',
             user_id: userId,
@@ -41,23 +41,23 @@ async function sendToChatbase(userMessage, botResponse, userId = 'default-user',
 
         // Envia a mensagem do usuário para o ChatBase
         console.log('Enviando mensagem do usuário para o ChatBase...');
-        const userResponse = await axios.post('https://api.chatbase.com/message', userPayload, {
+        const userResult = await axios.post('https://api.chatbase.com/message', userPayload, {
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
             }
         });
-        console.log('Mensagem do usuário enviada ao ChatBase com sucesso:', userResponse.status);
+        console.log('Mensagem do usuário enviada ao ChatBase com sucesso:', userResult.status);
 
         // Envia a resposta do bot para o ChatBase
         console.log('Enviando resposta do bot para o ChatBase...');
-        const botResponse = await axios.post('https://api.chatbase.com/message', botPayload, {
+        const botResult = await axios.post('https://api.chatbase.com/message', botPayload, {
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
             }
         });
-        console.log('Resposta do bot enviada ao ChatBase com sucesso:', botResponse.status);
+        console.log('Resposta do bot enviada ao ChatBase com sucesso:', botResult.status);
 
         return true;
     } catch (error) {
@@ -95,14 +95,14 @@ app.post('/webhook', async (req, res) => {
             // ou chamar um serviço externo para obter uma resposta
             
             // Por enquanto, vamos usar uma resposta simples
-            const botResponse = `Recebi sua mensagem: "${userMessage}". Estou processando...`;
+            const botResponseText = `Recebi sua mensagem: "${userMessage}". Estou processando...`;
             
             // Envia os dados para o ChatBase
-            await sendToChatbase(userMessage, botResponse, userId);
+            await sendToChatbase(userMessage, botResponseText, userId);
             
             // Envia a resposta para o Google Chat
             res.json({
-                text: botResponse
+                text: botResponseText
             });
         } else {
             res.json({ text: "Desculpe, só posso processar mensagens de texto." });
