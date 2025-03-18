@@ -58,6 +58,8 @@ app.post('/webhook', (req, res) => {
     const intentName = req.body.intent || "default-intent"; // Nome da intent
     const botResponse = "Resposta automática do bot"; // Resposta do bot
 
+    console.log('Está sendo acessado o /webhook');
+
     // Envia dados ao Chatbase
     sendToChatbase(userMessage, botResponse, intentName, true);
 
