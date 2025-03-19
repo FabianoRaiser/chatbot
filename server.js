@@ -32,7 +32,7 @@ async function logToChatbase(userMessage, botResponseText, userId = 'default-use
                 {
                     headers: {
                         'Content-Type': 'application/json',
-                        'x-api-key': CHATBASE_API_KEY
+                        'Authorization': `Bearer ${CHATBASE_API_KEY}`
                     }
                 }
             );
