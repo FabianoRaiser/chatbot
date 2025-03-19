@@ -78,7 +78,7 @@ app.post('/webhook', async (req, res) => {
         console.log(`Mensagem recebida de ${userId}: ${userMessage}`);
         
         // Resposta do bot (pode ser substituída pela integração com Dialogflow)
-        const botResponseText = `Recebi sua mensagem: "${userMessage}". Estou processando...`;
+        let botResponseText = `Recebi sua mensagem: "${userMessage}". Estou processando...`;
         
         // Tenta registrar no ChatBase e exibe a mensagem de retorno
         const registroSucesso = await logToChatbase(userMessage, botResponseText, userId);
