@@ -1,9 +1,8 @@
 import axios from 'axios';
 
 const CHATBASE_API_KEY = process.env.CHATBASE_API_KEY; 
-const CHATBOT_ID = process.env.CHATBOT_ID; 
 
-async function logToChatbase(userMessage, botResponseText, userId = 'default-user') {
+async function logToChatbase(userMessage, botResponseText, userId = 'default-user', chatbotId) {
     try {
         const result = await axios.post(
             'https://www.chatbase.co/api/v1/chat',
@@ -13,7 +12,7 @@ async function logToChatbase(userMessage, botResponseText, userId = 'default-use
                     { content: botResponseText, role: 'assistant' }
                 ],
                 chatId: userId,
-                chatbotId: CHATBOT_ID,
+                chatbotId: chatbotId,
                 stream: false
             },
             {

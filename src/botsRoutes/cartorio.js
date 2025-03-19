@@ -3,14 +3,14 @@ import logToChatbase from '../connections/chatbase.js';
 
 const router = express.Router();
 
-const CHATBOT_ID = process.env.CHATBOT_ID_MAIA;
+const CHATBOT_ID = process.env.CHATBOT_ID_CATORIO;
 
 router.get('/googlechat', (req, res) => {
-    res.status(200).send("Teste de rota")
+    res.status(200).send("Teste de rota cartório")
 })
 
 router.post('/googlechat', async (req, res) => {
-    console.log('Webhook recebido - Maia');
+    console.log('Webhook recebido - Cartório');
     
     try {
         // Extrai os dados do evento do Google Chat
@@ -40,7 +40,6 @@ router.post('/googlechat', async (req, res) => {
         // Tenta registrar no ChatBase e exibe a mensagem de retorno
         const registroSucesso = await logToChatbase(userMessage, botResponseText, userId, CHATBOT_ID);
         if (registroSucesso !== 'Error') {
-            console.log(registroSucesso); 
             botResponseText = `${registroSucesso}`;
             console.log('Mensagem registrada com sucesso no ChatBase.');
         } else {
