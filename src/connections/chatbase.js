@@ -1,8 +1,7 @@
 import axios from 'axios';
 
-const CHATBASE_API_KEY = process.env.CHATBASE_API_KEY; 
 
-async function logToChatbase(userMessage, botResponseText, userId = 'default-user', chatbotId) {
+async function logToChatbase(userMessage, botResponseText, userId = 'default-user', chatbotId, chatbaseApiKey) {
     try {
         const result = await axios.post(
             'https://www.chatbase.co/api/v1/chat',
@@ -18,7 +17,7 @@ async function logToChatbase(userMessage, botResponseText, userId = 'default-use
             {
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${CHATBASE_API_KEY}`
+                    'Authorization': `Bearer ${chatbaseApiKey}`
                 }
             }
         );

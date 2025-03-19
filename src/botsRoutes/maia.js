@@ -4,6 +4,8 @@ import logToChatbase from '../connections/chatbase.js';
 const router = express.Router();
 
 const CHATBOT_ID = process.env.CHATBOT_ID_MAIA;
+const CHATBASE_API_KEY = process.env.CHATBASE_API_KEY_MAIA; 
+
 
 router.get('/googlechat', (req, res) => {
     res.status(200).send("Teste de rota")
@@ -38,7 +40,7 @@ router.post('/googlechat', async (req, res) => {
         let botResponseText = `Recebi sua mensagem: "${userMessage}". Estou processando...`;
         
         // Tenta registrar no ChatBase e exibe a mensagem de retorno
-        const registroSucesso = await logToChatbase(userMessage, botResponseText, userId, CHATBOT_ID);
+        const registroSucesso = await logToChatbase(userMessage, botResponseText, userId, CHATBOT_ID, CHATBASE_API_KEY);
         if (registroSucesso !== 'Error') {
             console.log(registroSucesso); 
             botResponseText = `${registroSucesso}`;

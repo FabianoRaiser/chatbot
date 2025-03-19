@@ -4,6 +4,8 @@ import logToChatbase from '../connections/chatbase.js';
 const router = express.Router();
 
 const CHATBOT_ID = process.env.CHATBOT_ID_CATORIO;
+const CHATBASE_API_KEY = process.env.CHATBASE_API_KEY_CARTORIO; 
+
 
 router.get('/googlechat', (req, res) => {
     res.status(200).send("Teste de rota cartório")
