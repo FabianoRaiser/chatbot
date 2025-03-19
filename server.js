@@ -42,7 +42,7 @@ async function logToChatbase(userMessage, botResponseText, userId = 'default-use
         if (error.response) {
             console.error('Detalhes:', error.response.status, error.response.data);
         }
-        return false;
+        return 'Error';
     }
 }
 
@@ -82,7 +82,7 @@ app.post('/webhook', async (req, res) => {
         
         // Tenta registrar no ChatBase e exibe a mensagem de retorno
         const registroSucesso = await logToChatbase(userMessage, botResponseText, userId);
-        if (registroSucesso) {
+        if (registroSucesso !== 'Error') {
             botResponseText = `${registroSucesso}`;
             console.log('Mensagem registrada com sucesso no ChatBase.');
         } else {
