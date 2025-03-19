@@ -36,8 +36,7 @@ async function logToChatbase(userMessage, botResponseText, userId = 'default-use
             }
         );
         console.log(`Sucesso na tentativa 1! Status: ${result.status}`);
-        console.log(result);
-        return result.text;
+        return result.data.text;
     } catch (error) {
         console.error('Falha na tentativa 1:', error.message);
         if (error.response) {
