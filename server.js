@@ -27,6 +27,7 @@ async function logToChatbase(userMessage, botResponseText, userId = 'default-use
                         { content: botResponseText, role: 'assistant' }
                     ],
                     chatId: userId,
+                    chatbotId: CHATBOT_ID,
                     stream: false
                 },
                 {
