@@ -2,20 +2,14 @@ const express = require('express');
 const axios = require('axios');
 const app = express();
 
-// Configurações do Chatbase
 const CHATBASE_API_KEY = process.env.CHATBASE_API_KEY; // Substitua pela sua API Key
 const CHATBOT_ID = process.env.CHATBOT_ID; // Substitua pelo ID do seu Chatbot
 
-// Middleware para tratar JSON
 app.use(express.json());
 
-// Porta do servidor
 const PORT = process.env.PORT || 8080;
 
-// Função para registrar conversas no ChatBase
 async function logToChatbase(userMessage, botResponseText, userId = 'default-user') {
-    // Tentativa 1: API mais nova com cabeçalho de API Key
-    console.log('Tentativa 1: API v1 com cabeçalho de API Key');
     try {
         const result = await axios.post(
             'https://www.chatbase.co/api/v1/chat',
@@ -35,10 +29,10 @@ async function logToChatbase(userMessage, botResponseText, userId = 'default-use
                 }
             }
         );
-        console.log(`Sucesso na tentativa 1! Status: ${result.status}`);
+        console.log(`Sucesso na Mensagem. Status: ${result.status}`);
         return result.data.text;
     } catch (error) {
-        console.error('Falha na tentativa 1:', error.message);
+        console.error('Falha na Mensagem: ', error.message);
         if (error.response) {
             console.error('Detalhes:', error.response.status, error.response.data);
         }
@@ -53,7 +47,7 @@ app.get('/', (req, res) => {
 
 // Endpoint para receber mensagens do Google Chat
 app.post('/webhook', async (req, res) => {
-    console.log('Webhook recebido:', JSON.stringify(req.body));
+    console.log('Webhook recebido');
     
     try {
         // Extrai os dados do evento do Google Chat
@@ -90,7 +84,6 @@ app.post('/webhook', async (req, res) => {
             console.log('Falha ao registrar a mensagem no ChatBase.');
         }
 
-        
         // Envia a resposta para o Google Chat
         res.json({
             text: botResponseText
