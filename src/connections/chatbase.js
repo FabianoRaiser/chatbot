@@ -1,4 +1,4 @@
-const axios = require('axios');
+import axios from 'axios';
 
 const CHATBASE_API_KEY = process.env.CHATBASE_API_KEY; 
 const CHATBOT_ID = process.env.CHATBOT_ID; 

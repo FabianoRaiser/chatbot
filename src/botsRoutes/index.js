@@ -1,5 +1,5 @@
-const express = require('express');
-const maiaRoute = require('./maia');
+import express from 'express'
+import maiaRoute from './maia.js';
 
 
 const router = express.Router();

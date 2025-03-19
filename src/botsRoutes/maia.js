@@ -1,5 +1,5 @@
-const express = require('express')
-const { default: logToChatbase } = require('./src/connections/chatbase');
+import express from 'express';
+import logToChatbase from '../connections/chatbase.js';
 
 const router = express.Router();
 

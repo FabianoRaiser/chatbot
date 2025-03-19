@@ -1,8 +1,8 @@
-const express = require('express');
-const axios = require('axios');
-const app = express();
-const botsRoutes = require('./src/botsRoutes/index');
+import express from 'express';
+import axios from 'axios';
+import botsRoutes from './src/botsRoutes/index.js';
 
+const app = express();
 app.use(express.json());
 
 const PORT = process.env.PORT || 8080;
