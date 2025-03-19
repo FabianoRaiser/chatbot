@@ -14,92 +14,35 @@ const PORT = process.env.PORT || 8080;
 
 // Função para registrar conversas no ChatBase
 async function logToChatbase(userMessage, botResponseText, userId = 'default-user') {
-    // Vamos tentar várias opções para maximizar chances de sucesso
-    const attempts = [
-        // Tentativa 1: API mais nova com cabeçalho de API Key
-        async () => {
-            console.log('Tentativa 1: API v1 com cabeçalho de API Key');
-            return await axios.post(
-                'https://www.chatbase.co/api/v1/chat',
-                {
-                    messages: [
-                        { content: userMessage, role: 'user' },
-                        { content: botResponseText, role: 'assistant' }
-                    ],
-                    chatId: userId,
-                    chatbotId: CHATBOT_ID,
-                    stream: false
-                },
-                {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${CHATBASE_API_KEY}`
-                    }
+    // Tentativa 1: API mais nova com cabeçalho de API Key
+    console.log('Tentativa 1: API v1 com cabeçalho de API Key');
+    try {
+        const result = await axios.post(
+            'https://www.chatbase.co/api/v1/chat',
+            {
+                messages: [
+                    { content: userMessage, role: 'user' },
+                    { content: botResponseText, role: 'assistant' }
+                ],
+                chatId: userId,
+                chatbotId: CHATBOT_ID,
+                stream: false
+            },
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${CHATBASE_API_KEY}`
                 }
-            );
-        },
-        
-        // Tentativa 2: API conversacional mais recente
-        async () => {
-            console.log('Tentativa 2: API de conversação com chatbot_id');
-            return await axios.post(
-                'https://www.chatbase.co/api/v1/conversation',
-                {
-                    chatbot_id: CHATBOT_ID,
-                    messages: [
-                        { content: userMessage, role: 'user' },
-                        { content: botResponseText, role: 'assistant' }
-                    ],
-                    user_id: userId
-                },
-                {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${CHATBASE_API_KEY}`
-                    }
-                }
-            );
-        },
-        
-        // Tentativa 3: API de feedback original
-        async () => {
-            console.log('Tentativa 3: API de feedback antiga');
-            return await axios.post(
-                'https://www.chatbase.co/api/v1/feedback',
-                {
-                    chatbot_id: CHATBOT_ID,
-                    user_input: userMessage,
-                    chat_response: botResponseText,
-                    user_id: userId
-                },
-                {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${CHATBASE_API_KEY}`
-                    }
-                }
-            );
-        }
-    ];
-    
-    // Tenta cada método até que um funcione
-    for (let i = 0; i < attempts.length; i++) {
-        try {
-            const result = await attempts[i]();
-            console.log(`Sucesso na tentativa ${i+1}! Status: ${result.status}`);
-            return true;
-        } catch (error) {
-            console.error(`Falha na tentativa ${i+1}:`, error.message);
-            if (error.response) {
-                console.error('Detalhes:', error.response.status, error.response.data);
             }
-            
-            // Se for a última tentativa, retorna falso
-            if (i === attempts.length - 1) {
-                return false;
-            }
-            // Caso contrário, continua para a próxima tentativa
+        );
+        console.log(`Sucesso na tentativa 1! Status: ${result.status}`);
+        return result.text;
+    } catch (error) {
+        console.error('Falha na tentativa 1:', error.message);
+        if (error.response) {
+            console.error('Detalhes:', error.response.status, error.response.data);
         }
+        return false;
     }
 }
 
@@ -137,8 +80,16 @@ app.post('/webhook', async (req, res) => {
         // Resposta do bot (pode ser substituída pela integração com Dialogflow)
         const botResponseText = `Recebi sua mensagem: "${userMessage}". Estou processando...`;
         
-        // Tenta registrar no ChatBase
-        await logToChatbase(userMessage, botResponseText, userId);
+        // Tenta registrar no ChatBase e exibe a mensagem de retorno
+        const registroSucesso = await logToChatbase(userMessage, botResponseText, userId);
+        if (registroSucesso) {
+            botResponseText = `${registroSucesso}`;
+            console.log('Mensagem registrada com sucesso no ChatBase.');
+        } else {
+            botResponseText = `Não consegui processar a sua mensagem`
+            console.log('Falha ao registrar a mensagem no ChatBase.');
+        }
+
         
         // Envia a resposta para o Google Chat
         res.json({
