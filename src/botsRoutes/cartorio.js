@@ -40,7 +40,7 @@ router.post('/googlechat', async (req, res) => {
         let botResponseText = `Recebi sua mensagem: "${userMessage}". Estou processando...`;
         
         // Tenta registrar no ChatBase e exibe a mensagem de retorno
-        const registroSucesso = await logToChatbase(userMessage, botResponseText, userId, CHATBOT_ID);
+        const registroSucesso = await logToChatbase(userMessage, botResponseText, userId, CHATBOT_ID, CHATBASE_API_KEY);
         if (registroSucesso !== 'Error') {
             botResponseText = `${registroSucesso}`;
             console.log('Mensagem registrada com sucesso no ChatBase.');
